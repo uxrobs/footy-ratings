@@ -3,7 +3,10 @@
 ## 1. Supabase
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run [`supabase/migrations/001_initial_schema.sql`](../supabase/migrations/001_initial_schema.sql).
+2. Open **SQL Editor** and run migrations in order:
+   - [`supabase/migrations/001_initial_schema.sql`](../supabase/migrations/001_initial_schema.sql)
+   - [`supabase/migrations/002_game_reviews.sql`](../supabase/migrations/002_game_reviews.sql)
+   - [`supabase/migrations/003_review_author_name.sql`](../supabase/migrations/003_review_author_name.sql)
 3. Copy your project URL, anon key, and service role key.
 
 ## 2. Seed Round 12 locally

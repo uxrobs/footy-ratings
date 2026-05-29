@@ -83,3 +83,13 @@ export interface RoundSummary {
   delta: number | null;
   games_with_both_phases: number;
 }
+
+export interface GameReview {
+  id: string;
+  game_id: string;
+  device_id: string;
+  author_name: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}

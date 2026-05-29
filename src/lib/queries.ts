@@ -3,6 +3,7 @@ import { computeAggregates } from "@/lib/ratings";
 import type {
   FactorAggregate,
   Game,
+  GameReview,
   GameWithAggregates,
   RatingFactor,
   Round,
@@ -358,4 +359,82 @@ export async function submitRating(input: SubmitRatingInput) {
   }
 
   return { ratingId };
+}
+
+export async function getReviewsForGame(gameId: string): Promise<GameReview[]> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("game_reviews")
+    .select("*")
+    .eq("game_id", gameId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getUserReviewForGame(
+  gameId: string,
+  deviceId: string,
+): Promise<GameReview | null> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("game_reviews")
+    .select("*")
+    .eq("game_id", gameId)
+    .eq("device_id", deviceId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export interface SubmitReviewInput {
+  gameId: string;
+  deviceId: string;
+  authorName: string;
+  body: string;
+}
+
+export async function submitReview(input: SubmitReviewInput) {
+  const supabase = getSupabaseAdmin();
+  const trimmedBody = input.body.trim();
+  const trimmedName = input.authorName.trim();
+
+  const { data: existing, error: existingError } = await supabase
+    .from("game_reviews")
+    .select("id")
+    .eq("game_id", input.gameId)
+    .eq("device_id", input.deviceId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+
+  if (existing?.id) {
+    const { error } = await supabase
+      .from("game_reviews")
+      .update({
+        author_name: trimmedName,
+        body: trimmedBody,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id);
+
+    if (error) throw error;
+    return { reviewId: existing.id, updated: true };
+  }
+
+  const { data, error } = await supabase
+    .from("game_reviews")
+    .insert({
+      game_id: input.gameId,
+      device_id: input.deviceId,
+      author_name: trimmedName,
+      body: trimmedBody,
+    })
+    .select("id")
+    .single();
+
+  if (error) throw error;
+  return { reviewId: data.id, updated: false };
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeltaBadge } from "@/components/DeltaBadge";
+import { GameReviewForm } from "@/components/GameReviewForm";
+import { GameReviewsList } from "@/components/GameReviewsList";
 import { RatingForm } from "@/components/RatingForm";
 import { ScoreDistributionChart } from "@/components/ScoreDistributionChart";
 import { SetupRequiredPage } from "@/components/SetupRequiredPage";
@@ -28,8 +30,10 @@ import {
   getGameById,
   getGamesWithAggregates,
   getRatingFactors,
+  getReviewsForGame,
   getScoreDistribution,
   getUserRatingsForGame,
+  getUserReviewForGame,
 } from "@/lib/queries";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { syncActiveRoundIfStale } from "@/lib/sync";
@@ -63,14 +67,23 @@ export default async function GamePage({ params }: GamePageProps) {
   }
 
   const deviceId = await getDeviceIdFromCookies();
-  const [gamesWithAggregates, factors, factorAggregates, distribution, userRatings] =
-    await Promise.all([
-      getGamesWithAggregates(round.id, deviceId),
-      getRatingFactors(),
-      getFactorAggregatesForGame(game.id),
-      getScoreDistribution(game.id),
-      deviceId ? getUserRatingsForGame(game.id, deviceId) : Promise.resolve(null),
-    ]);
+  const [
+    gamesWithAggregates,
+    factors,
+    factorAggregates,
+    distribution,
+    userRatings,
+    reviews,
+    userReview,
+  ] = await Promise.all([
+    getGamesWithAggregates(round.id, deviceId),
+    getRatingFactors(),
+    getFactorAggregatesForGame(game.id),
+    getScoreDistribution(game.id),
+    deviceId ? getUserRatingsForGame(game.id, deviceId) : Promise.resolve(null),
+    getReviewsForGame(game.id),
+    deviceId ? getUserReviewForGame(game.id, deviceId) : Promise.resolve(null),
+  ]);
 
   const enrichedGame = gamesWithAggregates.find((item) => item.id === game.id);
   const aggregates = enrichedGame?.aggregates ?? {
@@ -100,48 +113,6 @@ export default async function GamePage({ params }: GamePageProps) {
           ← Back to {round.name}
         </Link>
 
-        <section className="mb-8 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={game.status === "complete" ? "default" : "secondary"}>
-              {game.status === "complete" ? "Full time" : "Upcoming"}
-            </Badge>
-            <Badge variant="outline">{game.venue}</Badge>
-          </div>
-
-          <h1 className="text-3xl font-bold tracking-tight">
-            {game.home_team} vs {game.away_team}
-          </h1>
-
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1 font-medium"
-              style={{ backgroundColor: homeColors.primary, color: homeColors.text }}
-            >
-              {getTeamAbbreviation(game.home_team)} {game.home_team}
-            </span>
-            <span className="text-muted-foreground">vs</span>
-            <span
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1 font-medium"
-              style={{ backgroundColor: awayColors.primary, color: awayColors.text }}
-            >
-              {getTeamAbbreviation(game.away_team)} {game.away_team}
-            </span>
-          </div>
-
-          {game.status === "complete" && game.home_score !== null && game.away_score !== null && (
-            <p className="text-2xl font-semibold">
-              Final: {game.home_score} – {game.away_score}
-              {game.margin !== null && (
-                <span className="ml-2 text-base font-normal text-muted-foreground">
-                  ({game.margin} pt margin)
-                </span>
-              )}
-            </p>
-          )}
-
-          <DeltaBadge delta={aggregates.delta} />
-        </section>
-
         <div className="grid gap-6">
           <Card className="overflow-hidden pt-0">
             <div
@@ -151,6 +122,75 @@ export default async function GamePage({ params }: GamePageProps) {
               }}
               aria-hidden
             />
+            <CardHeader className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={game.status === "complete" ? "default" : "secondary"}>
+                  {game.status === "complete" ? "Full time" : "Upcoming"}
+                </Badge>
+                <Badge variant="outline">{game.venue}</Badge>
+              </div>
+
+              <div>
+                <CardTitle className="text-3xl">
+                  {game.home_team} vs {game.away_team}
+                </CardTitle>
+                <CardDescription className="mt-2">
+                  {new Date(game.kickoff_at).toLocaleString("en-AU", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </CardDescription>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <span
+                  className="inline-flex items-center gap-2 rounded-full px-3 py-1 font-medium"
+                  style={{
+                    backgroundColor: homeColors.primary,
+                    color: homeColors.text,
+                  }}
+                >
+                  {getTeamAbbreviation(game.home_team)} {game.home_team}
+                </span>
+                <span className="text-muted-foreground">vs</span>
+                <span
+                  className="inline-flex items-center gap-2 rounded-full px-3 py-1 font-medium"
+                  style={{
+                    backgroundColor: awayColors.primary,
+                    color: awayColors.text,
+                  }}
+                >
+                  {getTeamAbbreviation(game.away_team)} {game.away_team}
+                </span>
+              </div>
+
+              {game.status === "complete" &&
+                game.home_score !== null &&
+                game.away_score !== null && (
+                  <p className="text-2xl font-semibold">
+                    Final: {game.home_score} – {game.away_score}
+                    {game.margin !== null && (
+                      <span className="ml-2 text-base font-normal text-muted-foreground">
+                        ({game.margin} pt margin)
+                      </span>
+                    )}
+                  </p>
+                )}
+
+              <DeltaBadge delta={aggregates.delta} />
+            </CardHeader>
+            <CardContent>
+              <GameReviewForm
+                gameId={game.id}
+                gameComplete={game.status === "complete"}
+                userReview={userReview}
+              />
+            </CardContent>
+          </Card>
+          <Card>
             <CardHeader>
               <CardTitle>Community scores</CardTitle>
               <CardDescription>Expectation vs reality for this game</CardDescription>
@@ -262,6 +302,8 @@ export default async function GamePage({ params }: GamePageProps) {
                 </CardHeader>
               </Card>
             )}
+
+          <GameReviewsList reviews={reviews} userReviewId={userReview?.id ?? null} />
         </div>
       </main>
     </>
