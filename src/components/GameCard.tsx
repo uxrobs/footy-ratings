@@ -59,7 +59,14 @@ export function GameCard({ game }: GameCardProps) {
   const awayColors = getTeamColors(game.away_team);
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden pt-0 transition-shadow hover:shadow-md">
+      <div
+        className="h-1 w-full shrink-0"
+        style={{
+          background: `linear-gradient(to right, ${homeColors.primary} 50%, ${awayColors.primary} 50%)`,
+        }}
+        aria-hidden
+      />
       <CardHeader className="gap-3 pb-4">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -67,7 +74,7 @@ export function GameCard({ game }: GameCardProps) {
             <CardTitle className="mt-1 text-xl">
               <span className="inline-flex items-center gap-2">
                 <span
-                  className="inline-flex size-8 items-center justify-center rounded-full text-xs font-bold"
+                  className="inline-flex size-9 items-center justify-center rounded-full text-xs font-bold"
                   style={{
                     backgroundColor: homeColors.primary,
                     color: homeColors.text,
@@ -80,7 +87,7 @@ export function GameCard({ game }: GameCardProps) {
               <span className="mx-2 text-muted-foreground">vs</span>
               <span className="inline-flex items-center gap-2">
                 <span
-                  className="inline-flex size-8 items-center justify-center rounded-full text-xs font-bold"
+                  className="inline-flex size-9 items-center justify-center rounded-full text-xs font-bold"
                   style={{
                     backgroundColor: awayColors.primary,
                     color: awayColors.text,
@@ -101,7 +108,12 @@ export function GameCard({ game }: GameCardProps) {
 
       <CardContent className="space-y-4">
         {game.status === "complete" && game.home_score !== null && game.away_score !== null && (
-          <div className="rounded-lg bg-muted px-4 py-3 text-center text-lg font-semibold">
+          <div
+            className="rounded-lg px-4 py-3 text-center text-lg font-semibold"
+            style={{
+              background: `linear-gradient(to right, color-mix(in srgb, ${homeColors.primary} 12%, white), color-mix(in srgb, ${awayColors.primary} 12%, white))`,
+            }}
+          >
             {game.home_score} – {game.away_score}
             {game.margin !== null && (
               <span className="ml-2 text-sm font-normal text-muted-foreground">

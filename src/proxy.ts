@@ -6,7 +6,7 @@ import {
   getDeviceCookieOptions,
 } from "@/lib/device-cookie";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const response = NextResponse.next();
   const existingDevice = request.cookies.get(DEVICE_COOKIE)?.value;
 

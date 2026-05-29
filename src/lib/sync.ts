@@ -4,6 +4,13 @@ import { getActiveRound } from "@/lib/queries";
 
 const DEFAULT_SYNC_INTERVAL_MINUTES = 30;
 
+function isSyncSkippedInDev(): boolean {
+  return (
+    process.env.NODE_ENV === "development" &&
+    process.env.SKIP_SYNC_IN_DEV === "true"
+  );
+}
+
 function getSyncIntervalMs(): number {
   const minutes = Number(
     process.env.SYNC_INTERVAL_MINUTES ?? DEFAULT_SYNC_INTERVAL_MINUTES,
@@ -20,6 +27,10 @@ export async function syncActiveRoundIfStale(): Promise<{
   round?: string;
   message?: string;
 }> {
+  if (isSyncSkippedInDev()) {
+    return { ran: false, skipped: true, reason: "dev_skip" };
+  }
+
   const round = await getActiveRound();
   if (!round) {
     return { ran: false, skipped: true, reason: "no_active_round" };

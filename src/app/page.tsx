@@ -2,6 +2,13 @@ import { GameCard } from "@/components/GameCard";
 import { SetupRequiredPage } from "@/components/SetupRequiredPage";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DeltaBadge } from "@/components/DeltaBadge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { formatDelta, formatScore } from "@/lib/ratings";
 import {
   getActiveRound,
@@ -65,22 +72,38 @@ export default async function HomePage() {
         </section>
 
         {summary.games_with_both_phases > 0 && (
-          <section className="mb-8 rounded-xl border bg-muted/40 p-5">
-            <p className="text-sm text-muted-foreground">Round summary</p>
-            <div className="mt-2 flex flex-wrap items-center gap-4">
-              <div>
-                <p className="text-xs uppercase text-muted-foreground">Expected</p>
-                <p className="text-2xl font-semibold">{formatScore(summary.expectation_avg)}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase text-muted-foreground">Delivered</p>
-                <p className="text-2xl font-semibold">{formatScore(summary.reality_avg)}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase text-muted-foreground">Delta</p>
-                <p className="text-2xl font-semibold">{formatDelta(summary.delta)}</p>
-              </div>
-            </div>
+          <section className="mb-8">
+            <Card className="border-l-4 border-l-primary/30">
+              <CardHeader className="pb-2">
+                <CardDescription>Round summary</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap items-center gap-6">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Expected
+                    </p>
+                    <p className="text-2xl font-semibold">
+                      {formatScore(summary.expectation_avg)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Delivered
+                    </p>
+                    <p className="text-2xl font-semibold">
+                      {formatScore(summary.reality_avg)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Delta
+                    </p>
+                    <p className="text-2xl font-semibold">{formatDelta(summary.delta)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </section>
         )}
 
@@ -89,14 +112,16 @@ export default async function HomePage() {
             <h2 className="text-lg font-semibold">Biggest surprises this round</h2>
             <div className="grid gap-3 md:grid-cols-3">
               {surprises.map((game) => (
-                <div key={game.id} className="rounded-lg border p-4">
-                  <p className="font-medium">
-                    {game.home_team} vs {game.away_team}
-                  </p>
-                  <div className="mt-2">
+                <Card key={game.id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">
+                      {game.home_team} vs {game.away_team}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <DeltaBadge delta={game.aggregates.delta} />
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </section>

@@ -39,10 +39,13 @@ npm run dev
 
 ## Scripts
 
-- `npm run dev` — local development
+- `npm run dev` — local development (Webpack; lower memory use than Turbopack on some machines)
+- `npm run dev:turbo` — local development with Turbopack
 - `npm run build` — production build
 - `npm run seed` — seed/sync active round from Squiggle
 - `npm run sync` — refresh fixtures for the active round
+
+Set `SKIP_SYNC_IN_DEV=true` in `.env.local` to avoid Squiggle sync on every page load during dev; run `npm run sync` when you need fresh fixtures.
 
 ## Deployment (Vercel)
 

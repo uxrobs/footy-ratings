@@ -143,7 +143,14 @@ export default async function GamePage({ params }: GamePageProps) {
         </section>
 
         <div className="grid gap-6">
-          <Card>
+          <Card className="overflow-hidden pt-0">
+            <div
+              className="h-1 w-full shrink-0"
+              style={{
+                background: `linear-gradient(to right, ${homeColors.primary} 50%, ${awayColors.primary} 50%)`,
+              }}
+              aria-hidden
+            />
             <CardHeader>
               <CardTitle>Community scores</CardTitle>
               <CardDescription>Expectation vs reality for this game</CardDescription>

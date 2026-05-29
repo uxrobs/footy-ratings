@@ -1,0 +1,27 @@
+---
+description: Local dev defaults — Webpack, skip page-load sync, memory-conscious Next.js
+alwaysApply: true
+---
+
+# Local development (FootyRatings)
+
+## Dev server
+
+- Default local dev is **Webpack**, not Turbopack: `npm run dev` runs `next dev --webpack` (lower memory on this machine).
+- Only suggest or use Turbopack (`npm run dev:turbo`) if the user explicitly asks.
+- For UI-only testing without HMR, `npm run build && npm run start` is lighter than leaving `next dev` running.
+
+## Fixture sync
+
+- In development, page-load sync is **off** when `SKIP_SYNC_IN_DEV=true` in `.env.local` (see `syncActiveRoundIfStale` in `src/lib/sync.ts`).
+- Do not remove this guard without asking. When fresh fixtures are needed locally, tell the user to run `npm run sync` (or `npm run seed`), not to re-enable sync on every request.
+- Production/deployed behavior must keep auto-sync on page loads (guard is dev-only).
+
+## Next.js conventions in this repo
+
+- Use **`src/proxy.ts`** (export `proxy`), not `middleware.ts` — middleware is deprecated in Next.js 16.
+- `next.config.ts` sets `turbopack.root` to the project directory; do not remove it (avoids wrong workspace root when a parent `package-lock.json` exists).
+
+## When suggesting dev troubleshooting
+
+- Prefer stopping `next dev` when not coding, killing stray `next`/`node` processes after crashes, and Webpack over Turbopack before heavier config changes.
