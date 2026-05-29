@@ -2,6 +2,52 @@ import { fetchSquiggleGames, mapSquiggleGame } from "@/lib/squiggle";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getActiveRound } from "@/lib/queries";
 
+const DEFAULT_SYNC_INTERVAL_MINUTES = 30;
+
+function getSyncIntervalMs(): number {
+  const minutes = Number(
+    process.env.SYNC_INTERVAL_MINUTES ?? DEFAULT_SYNC_INTERVAL_MINUTES,
+  );
+  return Math.max(5, minutes) * 60 * 1000;
+}
+
+/** Sync fixtures when data is stale. Used instead of Vercel cron on free tier. */
+export async function syncActiveRoundIfStale(): Promise<{
+  ran: boolean;
+  skipped?: boolean;
+  reason?: string;
+  synced?: number;
+  round?: string;
+  message?: string;
+}> {
+  const round = await getActiveRound();
+  if (!round) {
+    return { ran: false, skipped: true, reason: "no_active_round" };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data: latestGame, error } = await supabase
+    .from("games")
+    .select("updated_at")
+    .eq("round_id", round.id)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  const intervalMs = getSyncIntervalMs();
+  if (latestGame?.updated_at) {
+    const ageMs = Date.now() - new Date(latestGame.updated_at).getTime();
+    if (ageMs < intervalMs) {
+      return { ran: false, skipped: true, reason: "fresh" };
+    }
+  }
+
+  const result = await syncActiveRoundFixtures();
+  return { ran: true, ...result };
+}
+
 export async function syncActiveRoundFixtures() {
   const round = await getActiveRound();
   if (!round) {

@@ -48,7 +48,7 @@ npm run dev
 
 1. Push to GitHub and import the repo in Vercel.
 2. Add env vars from `.env.example`.
-3. Set `CRON_SECRET` and configure Vercel Cron (see `vercel.json`).
+3. Optionally set `SYNC_INTERVAL_MINUTES` (default `30`) and `CRON_SECRET` for manual sync only.
 4. Run `npm run seed` locally or via a one-off script after first deploy.
 
 ## Round management

@@ -25,11 +25,13 @@ npm run seed
    - `CRON_SECRET` (random string)
 4. Deploy.
 
-## 4. Cron sync
+## 4. Fixture sync (no Vercel cron required)
 
-`vercel.json` configures an hourly cron hitting `/api/sync/fixtures`. Vercel sends `Authorization: Bearer $CRON_SECRET` automatically when `CRON_SECRET` is set in the project.
+Fixtures sync **automatically when someone visits** the home page or a game page, at most once every 30 minutes (configurable via `SYNC_INTERVAL_MINUTES`).
 
-During heavy match days, change the schedule in `vercel.json` to every 15–30 minutes.
+This avoids Vercel’s free-tier limit of one cron job per day.
+
+Optional: set `CRON_SECRET` and `POST /api/sync/fixtures` if you want to trigger a manual sync (e.g. from your laptop).
 
 ## 5. Soft launch
 

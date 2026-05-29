@@ -32,6 +32,7 @@ import {
   getUserRatingsForGame,
 } from "@/lib/queries";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { syncActiveRoundIfStale } from "@/lib/sync";
 import { getTeamAbbreviation, getTeamColors } from "@/lib/teams";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,12 @@ interface GamePageProps {
 export default async function GamePage({ params }: GamePageProps) {
   if (!isSupabaseConfigured()) {
     return <SetupRequiredPage />;
+  }
+
+  try {
+    await syncActiveRoundIfStale();
+  } catch (error) {
+    console.error("Fixture sync skipped:", error);
   }
 
   const { id } = await params;
