@@ -53,15 +53,13 @@ npm run dev
 
 ## Round management
 
-Only one round is active at a time. To unlock the next round after the current round completes:
+Only one round is active at a time. After the last game of a round finishes, the site auto-advances to the next round on the next fixture sync (when someone visits).
 
-```sql
-update rounds set is_active = false where is_active = true;
-update rounds set is_active = true, unlocked_at = now()
-where year = 2026 and round_number = 13;
-```
+Initial setup: `npm run seed` (defaults to 2026 Round 12).
 
-Then run `npm run sync`.
+Manual next round: `SEED_ROUND=13 npm run seed`
+
+Disable auto-advance: set `AUTO_ADVANCE_ROUNDS=false`.
 
 ## License
 

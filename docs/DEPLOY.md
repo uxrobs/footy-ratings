@@ -40,14 +40,14 @@ After deploy and seed:
 1. Open the live URL and rate an upcoming Round 12 game.
 2. Post to [r/AFL](https://www.reddit.com/r/AFL/) once the first completed game shows an expectation vs reality delta.
 
-## Unlocking the next round
+## Next round (automatic)
 
-When all games in Round 12 are complete:
+When every game in the active round is `complete`, the next sync (triggered by a site visit) will automatically seed the next round from Squiggle.
 
-```sql
-update rounds set is_active = false where is_active = true;
-update rounds set is_active = true, unlocked_at = now()
-where year = 2026 and round_number = 13;
+To turn this off, set `AUTO_ADVANCE_ROUNDS=false` in Vercel env vars.
+
+Manual override:
+
+```bash
+SEED_ROUND=13 npm run seed
 ```
-
-Then run `npm run seed` with `SEED_ROUND=13`, or call the sync endpoint after inserting the round row manually.

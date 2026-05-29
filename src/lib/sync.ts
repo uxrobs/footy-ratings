@@ -73,11 +73,72 @@ export async function syncActiveRoundFixtures() {
     synced += 1;
   }
 
+  const advance = await maybeAdvanceToNextRound();
+
   return {
     synced,
     round: round.name,
-    message: `Synced ${synced} games for ${round.name}`,
+    advanced: advance.advanced,
+    message: advance.advanced
+      ? `Synced ${synced} games. ${advance.message}`
+      : `Synced ${synced} games for ${round.name}`,
   };
+}
+
+function isAutoAdvanceEnabled(): boolean {
+  return process.env.AUTO_ADVANCE_ROUNDS !== "false";
+}
+
+/** When every game in the active round is complete, seed the next round from Squiggle. */
+export async function maybeAdvanceToNextRound(): Promise<{
+  advanced: boolean;
+  message?: string;
+}> {
+  if (!isAutoAdvanceEnabled()) {
+    return { advanced: false };
+  }
+
+  const round = await getActiveRound();
+  if (!round) {
+    return { advanced: false };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data: games, error } = await supabase
+    .from("games")
+    .select("status")
+    .eq("round_id", round.id);
+
+  if (error) throw error;
+  if (!games?.length) {
+    return { advanced: false };
+  }
+
+  const allComplete = games.every((game) => game.status === "complete");
+  if (!allComplete) {
+    return { advanced: false };
+  }
+
+  const nextRoundNumber = round.round_number + 1;
+
+  try {
+    const squiggleGames = await fetchSquiggleGames(round.year, nextRoundNumber);
+    if (squiggleGames.length === 0) {
+      return {
+        advanced: false,
+        message: `${round.name} is complete; Round ${nextRoundNumber} is not on Squiggle yet.`,
+      };
+    }
+
+    const result = await seedRound(round.year, nextRoundNumber, true);
+    return {
+      advanced: true,
+      message: `Auto-advanced to ${result.round.name} (${result.games} games).`,
+    };
+  } catch (error) {
+    console.error("Auto-advance failed:", error);
+    return { advanced: false };
+  }
 }
 
 export async function seedRound(
