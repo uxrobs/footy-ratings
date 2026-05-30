@@ -1,4 +1,5 @@
 import type { GameStatus } from "@/types/database";
+import { parseSquiggleKickoff } from "@/lib/datetime";
 
 export interface SquiggleGame {
   id: number;
@@ -63,7 +64,7 @@ export function mapSquiggleGame(game: SquiggleGame) {
     home_team: game.hteam,
     away_team: game.ateam,
     venue: game.venue,
-    kickoff_at: game.localtime || game.date,
+    kickoff_at: parseSquiggleKickoff(game.localtime || game.date),
     status,
     home_score: homeScore,
     away_score: awayScore,

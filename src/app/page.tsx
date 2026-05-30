@@ -1,4 +1,5 @@
 import { GameCard } from "@/components/GameCard";
+import { MatchCardHeader } from "@/components/MatchCardHeader";
 import { SetupRequiredPage } from "@/components/SetupRequiredPage";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DeltaBadge } from "@/components/DeltaBadge";
@@ -7,7 +8,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { formatDelta, formatScore } from "@/lib/ratings";
 import {
@@ -110,15 +110,21 @@ export default async function HomePage() {
         {surprises.length > 0 && (
           <section className="mb-8 space-y-3">
             <h2 className="text-lg font-semibold">Biggest surprises this round</h2>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,480px),1fr))]">
               {surprises.map((game) => (
-                <Card key={game.id}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">
-                      {game.home_team} vs {game.away_team}
-                    </CardTitle>
+                <Card key={game.id} className="min-w-0 w-full rounded-[10px] border-[#d7d7d7] shadow-none">
+                  <CardHeader className="px-4 pb-2">
+                    <MatchCardHeader
+                      venue={game.venue}
+                      kickoffAt={game.kickoff_at}
+                      status={game.status}
+                      homeTeam={game.home_team}
+                      awayTeam={game.away_team}
+                      homeScore={game.home_score}
+                      awayScore={game.away_score}
+                    />
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-4">
                     <DeltaBadge delta={game.aggregates.delta} />
                   </CardContent>
                 </Card>

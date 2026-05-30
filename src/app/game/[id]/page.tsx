@@ -2,12 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeltaBadge } from "@/components/DeltaBadge";
 import { GameReviewForm } from "@/components/GameReviewForm";
+import { MatchCardHeader } from "@/components/MatchCardHeader";
 import { GameReviewsList } from "@/components/GameReviewsList";
 import { RatingForm } from "@/components/RatingForm";
 import { ScoreDistributionChart } from "@/components/ScoreDistributionChart";
 import { SetupRequiredPage } from "@/components/SetupRequiredPage";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -37,7 +37,6 @@ import {
 } from "@/lib/queries";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { syncActiveRoundIfStale } from "@/lib/sync";
-import { getTeamAbbreviation, getTeamColors } from "@/lib/teams";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -95,8 +94,6 @@ export default async function GamePage({ params }: GamePageProps) {
   };
 
   const activePhase = getRatingPhaseForGame(game.status);
-  const homeColors = getTeamColors(game.home_team);
-  const awayColors = getTeamColors(game.away_team);
 
   const closenessAggregate = factorAggregates.find(
     (factor) => factor.slug === "closeness",
@@ -114,75 +111,27 @@ export default async function GamePage({ params }: GamePageProps) {
         </Link>
 
         <div className="grid gap-6">
-          <Card className="overflow-hidden pt-0">
-            <div
-              className="h-1 w-full shrink-0"
-              style={{
-                background: `linear-gradient(to right, ${homeColors.primary} 50%, ${awayColors.primary} 50%)`,
-              }}
-              aria-hidden
-            />
-            <CardHeader className="space-y-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={game.status === "complete" ? "default" : "secondary"}>
-                  {game.status === "complete" ? "Full time" : "Upcoming"}
-                </Badge>
-                <Badge variant="outline">{game.venue}</Badge>
-              </div>
+          <Card className="gap-4 overflow-hidden rounded-[10px] border-[#d7d7d7] py-4 shadow-none">
+            <CardHeader className="gap-4 px-4 pb-0">
+              <MatchCardHeader
+                venue={game.venue}
+                kickoffAt={game.kickoff_at}
+                status={game.status}
+                homeTeam={game.home_team}
+                awayTeam={game.away_team}
+                homeScore={game.home_score}
+                awayScore={game.away_score}
+              />
 
-              <div>
-                <CardTitle className="text-3xl">
-                  {game.home_team} vs {game.away_team}
-                </CardTitle>
-                <CardDescription className="mt-2">
-                  {new Date(game.kickoff_at).toLocaleString("en-AU", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                </CardDescription>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 text-sm">
-                <span
-                  className="inline-flex items-center gap-2 rounded-full px-3 py-1 font-medium"
-                  style={{
-                    backgroundColor: homeColors.primary,
-                    color: homeColors.text,
-                  }}
-                >
-                  {getTeamAbbreviation(game.home_team)} {game.home_team}
-                </span>
-                <span className="text-muted-foreground">vs</span>
-                <span
-                  className="inline-flex items-center gap-2 rounded-full px-3 py-1 font-medium"
-                  style={{
-                    backgroundColor: awayColors.primary,
-                    color: awayColors.text,
-                  }}
-                >
-                  {getTeamAbbreviation(game.away_team)} {game.away_team}
-                </span>
-              </div>
-
-              {game.status === "complete" &&
-                game.home_score !== null &&
-                game.away_score !== null && (
-                  <p className="text-2xl font-semibold">
-                    Final: {game.home_score} – {game.away_score}
-                    {game.margin !== null && (
-                      <span className="ml-2 text-base font-normal text-muted-foreground">
-                        ({game.margin} pt margin)
-                      </span>
-                    )}
-                  </p>
-                )}
+              {game.status === "complete" && game.margin !== null && (
+                <p className="text-center text-sm text-[#757575]">
+                  {game.margin} pt margin
+                </p>
+              )}
 
               <DeltaBadge delta={aggregates.delta} />
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4">
               <GameReviewForm
                 gameId={game.id}
                 gameComplete={game.status === "complete"}
@@ -190,35 +139,35 @@ export default async function GamePage({ params }: GamePageProps) {
               />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-[10px] border-[#d7d7d7] shadow-none">
             <CardHeader>
               <CardTitle>Community scores</CardTitle>
               <CardDescription>Expectation vs reality for this game</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Expected</p>
-                <p className="text-3xl font-bold">{formatScore(aggregates.expectation_avg)}</p>
-                <p className="text-xs text-muted-foreground">
+              <div className="rounded-lg border border-[#d7d7d7] p-3">
+                <p className="text-sm text-[#757575]">Expected</p>
+                <p className="text-3xl font-bold text-[#1d1d1d]">{formatScore(aggregates.expectation_avg)}</p>
+                <p className="text-xs text-[#757575]">
                   {aggregates.expectation_count} votes
                 </p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Reality</p>
-                <p className="text-3xl font-bold">{formatScore(aggregates.reality_avg)}</p>
-                <p className="text-xs text-muted-foreground">
+              <div className="rounded-lg border border-[#d7d7d7] p-3">
+                <p className="text-sm text-[#757575]">Reality</p>
+                <p className="text-3xl font-bold text-[#1d1d1d]">{formatScore(aggregates.reality_avg)}</p>
+                <p className="text-xs text-[#757575]">
                   {aggregates.reality_count} votes
                 </p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Delta</p>
-                <p className="text-3xl font-bold">{formatDelta(aggregates.delta)}</p>
+              <div className="rounded-lg border border-[#d7d7d7] p-3">
+                <p className="text-sm text-[#757575]">Delta</p>
+                <p className="text-3xl font-bold text-[#1d1d1d]">{formatDelta(aggregates.delta)}</p>
               </div>
             </CardContent>
           </Card>
 
           {activePhase && canRatePhase(game.status, activePhase) && (
-            <Card>
+            <Card className="rounded-[10px] border-[#d7d7d7] shadow-none">
               <CardHeader>
                 <CardTitle>
                   {activePhase === "expectation" ? "Rate your expectation" : "Rate the reality"}
@@ -243,14 +192,14 @@ export default async function GamePage({ params }: GamePageProps) {
           )}
 
           {game.status === "live" && (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
+            <Card className="rounded-[10px] border-[#d7d7d7] shadow-none">
+              <CardContent className="py-8 text-center text-[#757575]">
                 This game is live. Reality ratings open after full time.
               </CardContent>
             </Card>
           )}
 
-          <Card>
+          <Card className="rounded-[10px] border-[#d7d7d7] shadow-none">
             <CardHeader>
               <CardTitle>Score distribution</CardTitle>
               <CardDescription>How fans rated this game out of 10</CardDescription>
@@ -263,7 +212,7 @@ export default async function GamePage({ params }: GamePageProps) {
           {factorAggregates.some(
             (factor) => factor.expectation_avg !== null || factor.reality_avg !== null,
           ) && (
-            <Card>
+            <Card className="rounded-[10px] border-[#d7d7d7] shadow-none">
               <CardHeader>
                 <CardTitle>Factor breakdown</CardTitle>
                 <CardDescription>Optional detailed ratings from the community</CardDescription>
@@ -292,7 +241,7 @@ export default async function GamePage({ params }: GamePageProps) {
             closenessAggregate &&
             closenessAggregate.reality_avg !== null &&
             game.margin !== null && (
-              <Card>
+              <Card className="rounded-[10px] border-[#d7d7d7] shadow-none">
                 <CardHeader>
                   <CardTitle>Closeness vs margin</CardTitle>
                   <CardDescription>
