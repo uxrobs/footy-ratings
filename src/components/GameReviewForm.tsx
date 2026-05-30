@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { GameButton } from "@/components/GameButton";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -154,14 +154,19 @@ export function GameReviewForm({
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button
+          <button
             type="submit"
             disabled={
               submitting || authorName.trim().length < 1 || body.trim().length < 1
             }
+            className="disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Saving..." : "Post review"}
-          </Button>
+            <GameButton
+              variant="reality"
+              label={submitting ? "Saving..." : "Post review"}
+              loading={submitting}
+            />
+          </button>
         </form>
       )}
     </div>

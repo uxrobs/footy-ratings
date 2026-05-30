@@ -3,9 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GameButton } from "@/components/GameButton";
-import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import type { RatingFactor } from "@/types/database";
 
@@ -168,21 +166,19 @@ export function RatingForm({
       <button
         type="submit"
         disabled={submitting}
-        className={cn(
-          "flex w-full justify-center disabled:cursor-not-allowed disabled:opacity-60",
-        )}
+        className="flex w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {submitting ? (
-          <span className={cn(buttonVariants(), "inline-flex w-full justify-center")}>
-            Saving...
-          </span>
-        ) : existingRating ? (
-          <span className={cn(buttonVariants(), "inline-flex w-full justify-center")}>
-            Update rating
-          </span>
-        ) : (
-          <GameButton variant={phase} label={`Submit ${phaseLabel} rating`} />
-        )}
+        <GameButton
+          variant={phase}
+          label={
+            submitting
+              ? "Saving..."
+              : existingRating
+                ? "Update rating"
+                : `Submit ${phaseLabel} rating`
+          }
+          loading={submitting}
+        />
       </button>
     </form>
   );

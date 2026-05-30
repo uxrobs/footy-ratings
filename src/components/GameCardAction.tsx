@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 import { GameButton } from "@/components/GameButton";
 import { getGameButtonVariant } from "@/lib/rating-buttons";
@@ -10,6 +13,7 @@ interface GameCardActionProps {
 }
 
 export function GameCardAction({ game }: GameCardActionProps) {
+  const [navigating, setNavigating] = useState(false);
   const phase = getRatingPhaseForGame(game.status);
   const userRating =
     phase === "expectation"
@@ -19,7 +23,12 @@ export function GameCardAction({ game }: GameCardActionProps) {
         : null;
 
   return (
-    <Link href={`/game/${game.id}`} className="inline-flex shrink-0">
+    <Link
+      href={`/game/${game.id}`}
+      className="inline-flex shrink-0"
+      onClick={() => setNavigating(true)}
+      aria-busy={navigating}
+    >
       <GameButton
         variant={getGameButtonVariant(game.status)}
         label={
@@ -27,6 +36,7 @@ export function GameCardAction({ game }: GameCardActionProps) {
             ? `Edit your ${phase} rating`
             : undefined
         }
+        loading={navigating}
       />
     </Link>
   );
