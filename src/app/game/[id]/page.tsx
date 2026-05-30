@@ -5,6 +5,7 @@ import { GameReviewForm } from "@/components/GameReviewForm";
 import { MatchCardHeader } from "@/components/MatchCardHeader";
 import { GameReviewsList } from "@/components/GameReviewsList";
 import { RatingForm } from "@/components/RatingForm";
+import { RoundPicker } from "@/components/RoundPicker";
 import { ScoreDistributionChart } from "@/components/ScoreDistributionChart";
 import { SetupRequiredPage } from "@/components/SetupRequiredPage";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -19,18 +20,25 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { getDeviceIdFromCookies } from "@/lib/device";
 import {
-  canRatePhase,
+  canSubmitRating,
   formatDelta,
   formatScore,
   getRatingPhaseForGame,
 } from "@/lib/ratings";
+import { loadRoundPageData } from "@/lib/round-page";
+import {
+  getRoundHref,
+  formatSubmissionsCloseAt,
+  isRoundViewable,
+} from "@/lib/rounds";
 import {
   getActiveRound,
   getFactorAggregatesForGame,
   getGameById,
-  getGamesWithAggregates,
+  getGamesForRound,
   getRatingFactors,
   getReviewsForGame,
+  getRoundById,
   getScoreDistribution,
   getUserRatingsForGame,
   getUserReviewForGame,
@@ -60,14 +68,26 @@ export default async function GamePage({ params }: GamePageProps) {
   const game = await getGameById(id);
   if (!game) notFound();
 
-  const round = await getActiveRound();
-  if (!round || game.round_id !== round.id) {
+  const [round, activeRound] = await Promise.all([
+    getRoundById(game.round_id),
+    getActiveRound(),
+  ]);
+
+  if (
+    !round ||
+    !activeRound ||
+    !isRoundViewable(round.round_number, activeRound.round_number)
+  ) {
     notFound();
   }
 
   const deviceId = await getDeviceIdFromCookies();
+  const roundPageData = await loadRoundPageData(round.round_number);
+  const roundGames = await getGamesForRound(round.id);
+  const submissionsOpen = roundPageData?.submissionsOpen ?? false;
+  const submissionsCloseAt = roundPageData?.submissionsCloseAt ?? null;
+
   const [
-    gamesWithAggregates,
     factors,
     factorAggregates,
     distribution,
@@ -75,7 +95,6 @@ export default async function GamePage({ params }: GamePageProps) {
     reviews,
     userReview,
   ] = await Promise.all([
-    getGamesWithAggregates(round.id, deviceId),
     getRatingFactors(),
     getFactorAggregatesForGame(game.id),
     getScoreDistribution(game.id),
@@ -84,31 +103,49 @@ export default async function GamePage({ params }: GamePageProps) {
     deviceId ? getUserReviewForGame(game.id, deviceId) : Promise.resolve(null),
   ]);
 
-  const enrichedGame = gamesWithAggregates.find((item) => item.id === game.id);
-  const aggregates = enrichedGame?.aggregates ?? {
-    expectation_avg: null,
-    reality_avg: null,
-    expectation_count: 0,
-    reality_count: 0,
-    delta: null,
-  };
+  const aggregates =
+    roundPageData?.games.find((item) => item.id === game.id)?.aggregates ?? {
+      expectation_avg: null,
+      reality_avg: null,
+      expectation_count: 0,
+      reality_count: 0,
+      delta: null,
+    };
 
   const activePhase = getRatingPhaseForGame(game.status);
+  const canRate =
+    activePhase !== null &&
+    canSubmitRating(game, activePhase, roundGames);
 
   const closenessAggregate = factorAggregates.find(
     (factor) => factor.slug === "closeness",
   );
 
+  const backHref = roundPageData
+    ? getRoundHref(round.round_number, roundPageData.defaultRoundNumber)
+    : "/";
+
   return (
     <>
       <SiteHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
+        {roundPageData && (
+          <RoundPicker items={roundPageData.roundNavItems} className="mb-4" />
+        )}
+
         <Link
-          href="/"
+          href={backHref}
           className={cn(buttonVariants({ variant: "ghost" }), "mb-4 -ml-2 inline-flex")}
         >
           ← Back to {round.name}
         </Link>
+
+        {!submissionsOpen && submissionsCloseAt && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Submissions for this round closed on{" "}
+            {formatSubmissionsCloseAt(submissionsCloseAt)}.
+          </p>
+        )}
 
         <div className="grid gap-6">
           <Card className="gap-4 overflow-hidden rounded-[10px] border-[#d7d7d7] py-4 shadow-none">
@@ -135,6 +172,7 @@ export default async function GamePage({ params }: GamePageProps) {
               <GameReviewForm
                 gameId={game.id}
                 gameComplete={game.status === "complete"}
+                submissionsOpen={submissionsOpen}
                 userReview={userReview}
               />
             </CardContent>
@@ -166,14 +204,15 @@ export default async function GamePage({ params }: GamePageProps) {
             </CardContent>
           </Card>
 
-          {activePhase && canRatePhase(game.status, activePhase) && (
+          {canRate && activePhase && (
             <Card className="rounded-[10px] border-[#d7d7d7] shadow-none">
               <CardHeader>
                 <CardTitle>
                   {activePhase === "expectation" ? "Rate your expectation" : "Rate the reality"}
                 </CardTitle>
                 <CardDescription>
-                  One vote per device. You can update your rating anytime during this phase.
+                  One vote per device. You can update your rating until this round closes for
+                  submissions.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -187,6 +226,14 @@ export default async function GamePage({ params }: GamePageProps) {
                       : userRatings?.reality
                   }
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {!submissionsOpen && activePhase && !canRate && (
+            <Card className="rounded-[10px] border-[#d7d7d7] shadow-none">
+              <CardContent className="py-8 text-center text-[#757575]">
+                This round is closed for new ratings and reviews.
               </CardContent>
             </Card>
           )}

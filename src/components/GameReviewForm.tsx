@@ -14,12 +14,14 @@ const MAX_NAME_LENGTH = 40;
 interface GameReviewFormProps {
   gameId: string;
   gameComplete: boolean;
+  submissionsOpen: boolean;
   userReview: GameReview | null;
 }
 
 export function GameReviewForm({
   gameId,
   gameComplete,
+  submissionsOpen,
   userReview,
 }: GameReviewFormProps) {
   const router = useRouter();
@@ -65,6 +67,17 @@ export function GameReviewForm({
       <div className="space-y-4">
         <Separator />
         <p className="text-sm text-muted-foreground">Reviews open after full time.</p>
+      </div>
+    );
+  }
+
+  if (!submissionsOpen && !hasReview) {
+    return (
+      <div className="space-y-4">
+        <Separator />
+        <p className="text-sm text-muted-foreground">
+          Reviews are closed for this round.
+        </p>
       </div>
     );
   }

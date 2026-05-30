@@ -1,4 +1,5 @@
-import type { GameAggregates, RatingPhase } from "@/types/database";
+import type { Game, GameAggregates, RatingPhase } from "@/types/database";
+import { isRoundOpenForSubmissions } from "@/lib/rounds";
 
 export interface DeltaLabel {
   label: string;
@@ -74,6 +75,23 @@ export function canRatePhase(
   if (phase === "expectation") return status === "upcoming";
   if (phase === "reality") return status === "complete";
   return false;
+}
+
+export function canSubmitRating(
+  game: Pick<Game, "status">,
+  phase: RatingPhase,
+  roundGames: Game[],
+): boolean {
+  if (!isRoundOpenForSubmissions(roundGames)) return false;
+  return canRatePhase(game.status, phase);
+}
+
+export function canSubmitReview(
+  game: Pick<Game, "status">,
+  roundGames: Game[],
+): boolean {
+  if (!isRoundOpenForSubmissions(roundGames)) return false;
+  return game.status === "complete";
 }
 
 export function getPhaseLabel(phase: RatingPhase): string {

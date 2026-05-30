@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDeviceIdFromCookies } from "@/lib/device";
-import { getGameById, getUserReviewForGame, submitReview } from "@/lib/queries";
+import { canSubmitReview } from "@/lib/ratings";
+import {
+  getGameById,
+  getGamesForRound,
+  getUserReviewForGame,
+  submitReview,
+} from "@/lib/queries";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
 const MAX_REVIEW_LENGTH = 500;
@@ -109,9 +115,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    if (game.status !== "complete") {
+    const roundGames = await getGamesForRound(game.round_id);
+
+    if (!canSubmitReview(game, roundGames)) {
       return NextResponse.json(
-        { error: "Reviews are only available after full time" },
+        {
+          error: game.status !== "complete"
+            ? "Reviews are only available after full time"
+            : "Submissions for this round are closed",
+        },
         { status: 400 },
       );
     }

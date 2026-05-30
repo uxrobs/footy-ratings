@@ -11,6 +11,52 @@ import type {
   ScoreDistribution,
 } from "@/types/database";
 
+export async function getRoundById(roundId: string): Promise<Round | null> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("rounds")
+    .select("*")
+    .eq("id", roundId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getRoundByNumber(
+  year: number,
+  roundNumber: number,
+): Promise<Round | null> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("rounds")
+    .select("*")
+    .eq("year", year)
+    .eq("round_number", roundNumber)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getRoundsInRange(
+  year: number,
+  fromRoundNumber: number,
+  toRoundNumber: number,
+): Promise<Round[]> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("rounds")
+    .select("*")
+    .eq("year", year)
+    .gte("round_number", fromRoundNumber)
+    .lte("round_number", toRoundNumber)
+    .order("round_number", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getActiveRound(): Promise<Round | null> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase

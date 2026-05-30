@@ -74,7 +74,7 @@ export function MatchCardHeader({
   const hasScores = homeScore !== null && awayScore !== null;
 
   return (
-    <div className={cn("@container/match-header flex w-full min-w-0 flex-col gap-3", className)}>
+    <div className={cn("@container/match-header flex w-full min-w-0 flex-col gap-5", className)}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <p className="truncate text-[15px] font-medium whitespace-nowrap text-[#757575]">
           {venue}

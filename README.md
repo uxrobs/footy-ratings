@@ -56,7 +56,9 @@ Set `SKIP_SYNC_IN_DEV=true` in `.env.local` to avoid Squiggle sync on every page
 
 ## Round management
 
-Only one round is active at a time. After the last game of a round finishes, the site auto-advances to the next round on the next fixture sync (when someone visits).
+Only one round is active at a time (used for fixture sync). After the last game of a round finishes, the site auto-advances to the next round on the next fixture sync (when someone visits).
+
+Users can browse Round 12 onward via the round picker. The homepage defaults to the previous round when the newly seeded round has not started yet. Ratings and reviews close 24 hours after the last game in a round completes.
 
 Initial setup: `npm run seed` (defaults to 2026 Round 12).
 

@@ -1,15 +1,13 @@
-import Link from "next/link";
 import { DeltaBadge } from "@/components/DeltaBadge";
+import { GameCardAction } from "@/components/GameCardAction";
 import { MatchCardHeader } from "@/components/MatchCardHeader";
-import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { formatScore, getRatingPhaseForGame } from "@/lib/ratings";
-import { cn } from "@/lib/utils";
+import { formatScore } from "@/lib/ratings";
 import type { GameWithAggregates } from "@/types/database";
 
 interface GameCardProps {
@@ -17,23 +15,6 @@ interface GameCardProps {
 }
 
 export function GameCard({ game }: GameCardProps) {
-  const phase = getRatingPhaseForGame(game.status);
-  const userRating =
-    phase === "expectation"
-      ? game.user_expectation
-      : phase === "reality"
-        ? game.user_reality
-        : null;
-
-  const ctaLabel =
-    userRating !== null
-      ? "Edit your rating"
-      : phase === "expectation"
-        ? "Rate expectation"
-        : phase === "reality"
-          ? "Rate reality"
-          : "View game";
-
   return (
     <Card className="w-full gap-4 overflow-hidden rounded-[10px] border-[#d7d7d7] py-4 shadow-none transition-shadow hover:shadow-md">
       <CardHeader className="gap-0 px-4 pb-0">
@@ -49,11 +30,13 @@ export function GameCard({ game }: GameCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-4 px-4">
-        {game.status === "complete" && game.margin !== null && (
-          <p className="text-center text-sm text-[#757575]">
-            {game.margin} pt margin
-          </p>
-        )}
+        <p className="h-5 text-center text-sm leading-5 text-[#757575]">
+          {game.status === "complete" && game.margin !== null
+            ? `${game.margin} pt margin`
+            : game.status === "live"
+              ? "In play"
+              : "\u00a0"}
+        </p>
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-lg border border-[#d7d7d7] p-3">
@@ -79,13 +62,8 @@ export function GameCard({ game }: GameCardProps) {
         <DeltaBadge delta={game.aggregates.delta} />
       </CardContent>
 
-      <CardFooter className="border-[#d7d7d7] px-4">
-        <Link
-          href={`/game/${game.id}`}
-          className={cn(buttonVariants(), "w-full")}
-        >
-          {ctaLabel}
-        </Link>
+      <CardFooter className="flex justify-center border-[#d7d7d7] px-4">
+        <GameCardAction game={game} />
       </CardFooter>
     </Card>
   );

@@ -22,6 +22,7 @@ export interface Game {
   home_score: number | null;
   away_score: number | null;
   margin: number | null;
+  updated_at: string;
 }
 
 export interface RatingFactor {

@@ -80,12 +80,18 @@ export default function AboutPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Current round only</CardTitle>
+            <CardTitle className="text-lg">Round history</CardTitle>
           </CardHeader>
           <CardContent className="text-sm leading-relaxed">
             <p>
-              Footy Ratings focuses on the active AFL round so ratings stay timely and
-              relevant. Once a round finishes, the next round is unlocked.
+              You can browse every round from Round 12 onward using the round picker on
+              the home page. When a new round is seeded, the site may default to the
+              round that just finished until the next round gets underway.
+            </p>
+            <p className="mt-3">
+              Ratings and reviews stay open for 24 hours after the last game in a round
+              finishes, then that round closes for new submissions. Scores and reviews
+              remain visible after that.
             </p>
           </CardContent>
         </Card>

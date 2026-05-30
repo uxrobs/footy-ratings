@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDeviceIdFromCookies } from "@/lib/device";
-import { canRatePhase } from "@/lib/ratings";
-import { getGameById, getUserRatingsForGame, submitRating } from "@/lib/queries";
+import { canSubmitRating } from "@/lib/ratings";
+import {
+  getGameById,
+  getGamesForRound,
+  getUserRatingsForGame,
+  submitRating,
+} from "@/lib/queries";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
 const rateLimitMap = new Map<string, number[]>();
@@ -93,9 +98,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    if (!canRatePhase(game.status, phase)) {
+    const roundGames = await getGamesForRound(game.round_id);
+
+    if (!canSubmitRating(game, phase, roundGames)) {
       return NextResponse.json(
-        { error: `Cannot submit ${phase} rating for this game status` },
+        {
+          error: roundGames.every((roundGame) => roundGame.status === "complete")
+            ? "Submissions for this round are closed"
+            : `Cannot submit ${phase} rating for this game status`,
+        },
         { status: 400 },
       );
     }
