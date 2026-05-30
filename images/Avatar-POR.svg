@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" width="45" height="45" role="img" aria-hidden="true">
+  <defs>
+    <clipPath id="clip-por">
+      <rect width="45" height="45" rx="8" ry="8"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip-por)">
+    <rect width="45" height="45" fill="#000000"/>
+    <polygon points="0,10 45,10 22.5,28" fill="#ffffff"/>
+    <polygon points="5,14 40,14 22.5,23" fill="#7dcbcc"/></g>
+</svg>

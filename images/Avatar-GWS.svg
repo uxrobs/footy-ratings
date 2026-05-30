@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" width="45" height="45" role="img" aria-hidden="true">
+  <defs>
+    <clipPath id="clip-gws">
+      <rect width="45" height="45" rx="8" ry="8"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip-gws)">
+    <rect x="0" y="0" width="45" height="20" fill="#53534c"/>
+    <rect x="0" y="20" width="45" height="25" fill="#f68f1e"/></g>
+</svg>

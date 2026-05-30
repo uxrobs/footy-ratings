@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" width="45" height="45" role="img" aria-hidden="true">
+  <defs>
+    <clipPath id="clip-syd">
+      <rect width="45" height="45" rx="8" ry="8"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip-syd)">
+    <rect width="45" height="45" fill="#ffffff"/>
+    <polygon points="0,0 45,0 22.5,22" fill="#e61938"/></g>
+</svg>

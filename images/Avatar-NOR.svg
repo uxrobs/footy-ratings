@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" width="45" height="45" role="img" aria-hidden="true">
+  <defs>
+    <clipPath id="clip-nor">
+      <rect width="45" height="45" rx="8" ry="8"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip-nor)">
+    <rect x="0" y="0" width="15" height="45" fill="#0155a6"/>
+    <rect x="15" y="0" width="15" height="45" fill="#ffffff"/>
+    <rect x="30" y="0" width="15" height="45" fill="#0155a6"/></g>
+</svg>
