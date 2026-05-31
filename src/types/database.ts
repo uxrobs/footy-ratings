@@ -70,6 +70,7 @@ export interface GameWithAggregates extends Game {
   aggregates: GameAggregates;
   user_expectation: number | null;
   user_reality: number | null;
+  review_count: number;
 }
 
 export interface ScoreDistribution {

@@ -148,7 +148,10 @@ export default async function GamePage({ params }: GamePageProps) {
         )}
 
         <div className="grid gap-6">
-          <Card className="gap-4 overflow-hidden rounded-[10px] border-[#d7d7d7] py-4 shadow-none">
+          <Card
+            id="review-form"
+            className="gap-4 overflow-hidden rounded-[10px] border-[#d7d7d7] py-4 shadow-none scroll-mt-8"
+          >
             <CardHeader className="gap-4 px-4 pb-0">
               <MatchCardHeader
                 venue={game.venue}

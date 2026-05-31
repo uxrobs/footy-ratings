@@ -118,12 +118,41 @@ async function getRatingsForGames(gameIds: string[]) {
   return data ?? [];
 }
 
+async function getReviewCountsForGames(
+  gameIds: string[],
+): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  for (const gameId of gameIds) {
+    counts.set(gameId, 0);
+  }
+
+  if (gameIds.length === 0) return counts;
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("game_reviews")
+    .select("game_id")
+    .in("game_id", gameIds);
+
+  if (error) throw error;
+
+  for (const row of data ?? []) {
+    counts.set(row.game_id, (counts.get(row.game_id) ?? 0) + 1);
+  }
+
+  return counts;
+}
+
 export async function getGamesWithAggregates(
   roundId: string,
   deviceId?: string | null,
 ): Promise<GameWithAggregates[]> {
   const games = await getGamesForRound(roundId);
-  const ratings = await getRatingsForGames(games.map((game) => game.id));
+  const gameIds = games.map((game) => game.id);
+  const [ratings, reviewCounts] = await Promise.all([
+    getRatingsForGames(gameIds),
+    getReviewCountsForGames(gameIds),
+  ]);
 
   return games.map((game) => {
     const gameRatings = ratings.filter((rating) => rating.game_id === game.id);
@@ -147,6 +176,7 @@ export async function getGamesWithAggregates(
       user_reality:
         userRatings.find((rating) => rating.phase === "reality")?.overall_score ??
         null,
+      review_count: reviewCounts.get(game.id) ?? 0,
     };
   });
 }

@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { MessageCircle } from "lucide-react";
+
 import { DeltaBadge } from "@/components/DeltaBadge";
 import { GameCardAction } from "@/components/GameCardAction";
 import { MatchCardHeader } from "@/components/MatchCardHeader";
@@ -59,7 +62,17 @@ export function GameCard({ game }: GameCardProps) {
           </div>
         </div>
 
-        <DeltaBadge delta={game.aggregates.delta} />
+        <div className="flex items-center justify-between gap-3">
+          <DeltaBadge delta={game.aggregates.delta} />
+          <Link
+            href={`/game/${game.id}#reviews`}
+            className="inline-flex shrink-0 items-center gap-1 text-xs text-[#757575] hover:text-[#1d1d1d]"
+          >
+            <MessageCircle className="size-3.5 shrink-0" aria-hidden />
+            {game.review_count}{" "}
+            {game.review_count === 1 ? "review" : "reviews"}
+          </Link>
+        </div>
       </CardContent>
 
       <CardFooter className="flex justify-center border-[#d7d7d7] px-4">
