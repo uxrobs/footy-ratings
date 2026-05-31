@@ -23,9 +23,12 @@ npm install
 cp .env.example .env.local
 ```
 
-3. Create a Supabase project and run the migration in [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql).
+3. Create a Supabase project and run migrations in order:
+   - [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql)
+   - [`supabase/migrations/002_game_reviews.sql`](supabase/migrations/002_game_reviews.sql)
+   - [`supabase/migrations/003_review_author_name.sql`](supabase/migrations/003_review_author_name.sql)
 
-4. Seed the active round (defaults to 2026 Round 12):
+4. Seed the launch round (defaults to 2026 Round 12):
 
 ```bash
 npm run seed
@@ -49,22 +52,26 @@ Set `SKIP_SYNC_IN_DEV=true` in `.env.local` to avoid Squiggle sync on every page
 
 ## Deployment (Vercel)
 
+See [`docs/DEPLOY.md`](docs/DEPLOY.md) for the full checklist. Summary:
+
 1. Push to GitHub and import the repo in Vercel.
 2. Add env vars from `.env.example`.
-3. Optionally set `SYNC_INTERVAL_MINUTES` (default `30`) and `CRON_SECRET` for manual sync only.
-4. Run `npm run seed` locally or via a one-off script after first deploy.
+3. Run migrations in Supabase, then `npm run seed` once after first deploy.
+4. Fixtures sync automatically when someone visits the site (no Vercel cron required). Optional: set `CRON_SECRET` to protect `POST /api/sync/fixtures` for manual syncs.
 
 ## Round management
 
-Only one round is active at a time (used for fixture sync). After the last game of a round finishes, the site auto-advances to the next round on the next fixture sync (when someone visits).
+One round is active at a time for fixture sync. **Round changes are automatic by default** — when every game in the active round is complete, the next site visit triggers a Squiggle sync that seeds the next round.
 
-Users can browse Round 12 onward via the round picker. The homepage defaults to the previous round when the newly seeded round has not started yet. Ratings and reviews close 24 hours after the last game in a round completes.
+- **Round picker:** browse Round 12 onward.
+- **Homepage default:** shows the previous round when the newly seeded round has not started yet.
+- **Submissions:** ratings and reviews close 24 hours after the last game in a round completes.
 
-Initial setup: `npm run seed` (defaults to 2026 Round 12).
+**First deploy only:** `npm run seed` (defaults to 2026 Round 12).
 
-Manual next round: `SEED_ROUND=13 npm run seed`
+**Manual override** (skip or replace auto-advance): `SEED_ROUND=13 npm run seed`
 
-Disable auto-advance: set `AUTO_ADVANCE_ROUNDS=false`.
+**Disable auto-advance:** set `AUTO_ADVANCE_ROUNDS=false` in env vars.
 
 ## License
 
