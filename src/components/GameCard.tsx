@@ -3,6 +3,7 @@ import { MessageCircle } from "lucide-react";
 
 import { DeltaBadge } from "@/components/DeltaBadge";
 import { GameCardAction } from "@/components/GameCardAction";
+import { GameCardMargin } from "@/components/GameCardMargin";
 import { MatchCardHeader } from "@/components/MatchCardHeader";
 import {
   Card,
@@ -33,13 +34,7 @@ export function GameCard({ game }: GameCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-4 px-4">
-        <p className="h-5 text-center text-sm leading-5 text-[#757575]">
-          {game.status === "complete" && game.margin !== null
-            ? `${game.margin} pt margin`
-            : game.status === "live"
-              ? "In play"
-              : "\u00a0"}
-        </p>
+        <GameCardMargin status={game.status} margin={game.margin} />
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-lg border border-[#d7d7d7] p-3">

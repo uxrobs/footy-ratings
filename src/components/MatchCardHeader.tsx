@@ -1,4 +1,5 @@
-import { GameStatusBadge } from "@/components/GameStatusBadge";
+import { MatchHeaderStatusRow } from "@/components/MatchHeaderStatusRow";
+import { MatchScoreCenter } from "@/components/MatchScoreCenter";
 import { TeamAvatar } from "@/components/TeamAvatar";
 import { formatGameKickoff } from "@/lib/datetime";
 import { cn } from "@/lib/utils";
@@ -13,25 +14,6 @@ interface MatchCardHeaderProps {
   homeScore?: number | null;
   awayScore?: number | null;
   className?: string;
-}
-
-function MatchScore({
-  homeScore,
-  awayScore,
-}: {
-  homeScore: number;
-  awayScore: number;
-}) {
-  const homeWon = homeScore > awayScore;
-  const awayWon = awayScore > homeScore;
-
-  return (
-    <p className="text-center text-base font-medium whitespace-nowrap text-[#8c8c8c] @min-[560px]/match-header:text-[19px]">
-      <span className={cn(homeWon && "font-bold text-[#010101]")}>{homeScore}</span>
-      <span className="mx-1">vs</span>
-      <span className={cn(awayWon && "font-bold text-[#010101]")}>{awayScore}</span>
-    </p>
-  );
 }
 
 function TeamBlock({
@@ -71,8 +53,6 @@ export function MatchCardHeader({
   awayScore = null,
   className,
 }: MatchCardHeaderProps) {
-  const hasScores = homeScore !== null && awayScore !== null;
-
   return (
     <div className={cn("@container/match-header flex w-full min-w-0 flex-col gap-5", className)}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -82,21 +62,13 @@ export function MatchCardHeader({
         <p className="truncate text-[15px] font-medium whitespace-nowrap text-[#757575]">
           {formatGameKickoff(kickoffAt, status === "upcoming" || status === "live")}
         </p>
-        <GameStatusBadge status={status} className="ml-auto shrink-0" />
+        <MatchHeaderStatusRow status={status} />
       </div>
 
       <div className="flex w-full min-w-0 items-center gap-1.5 @min-[400px]/match-header:gap-2">
         <TeamBlock team={homeTeam} />
 
-        <div className="shrink-0 px-0.5">
-          {hasScores ? (
-            <MatchScore homeScore={homeScore} awayScore={awayScore} />
-          ) : (
-            <p className="text-base font-medium whitespace-nowrap text-[#8c8c8c] @min-[560px]/match-header:text-[19px]">
-              vs
-            </p>
-          )}
-        </div>
+        <MatchScoreCenter homeScore={homeScore} awayScore={awayScore} />
 
         <TeamBlock team={awayTeam} align="end" />
       </div>

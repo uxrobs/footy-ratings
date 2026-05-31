@@ -1,5 +1,6 @@
 import { GameCard } from "@/components/GameCard";
 import { MatchCardHeader } from "@/components/MatchCardHeader";
+import { RoundScoresProvider } from "@/components/RoundScoresProvider";
 import { DeltaBadge } from "@/components/DeltaBadge";
 import { RoundPicker } from "@/components/RoundPicker";
 import {
@@ -104,6 +105,7 @@ export function RoundPageContent({ data }: RoundPageContentProps) {
         </section>
       )}
 
+      <RoundScoresProvider>
       {surprises.length > 0 && (
         <section className="mb-10 rounded-2xl border border-primary/15 bg-gradient-to-br from-accent/70 via-accent/40 to-background p-5 shadow-sm md:p-6">
           <div className="mb-5 space-y-1">
@@ -156,6 +158,7 @@ export function RoundPageContent({ data }: RoundPageContentProps) {
           ))}
         </div>
       </section>
+      </RoundScoresProvider>
     </>
   );
 }
